@@ -13,14 +13,14 @@ def is_opponent_in_front(x,y, next_checkpoint_x, next_checkpoint_y, opponent_x, 
 def speed_by_distance(dist, angle):
     thrust = 100
     
-    if  dist > 4000:
+    if angle < 90 and angle > -90 and dist > 4000:
         thrust = "BOOST"
     elif angle > 130 or angle < -130:
-        thrust = 8
+        thrust = 10
     elif angle > 90 or angle < -90:
         thrust = 20
     elif dist > 1500:
-        thrust = 100
+        thrust = 99
     else:
         thrust = round(0.06 * dist + 9)
     return thrust
@@ -32,8 +32,10 @@ def rotate(thrust, angle):
     return thrust
 
 
-start = True
 previous_checkpoint_dist = 999999
+previous_checkpoint_angle = 180
+
+start = True
 
 # game loop
 while True:
@@ -52,14 +54,24 @@ while True:
     #if previous_checkpoint_dist < next_checkpoint_dist \
     #    and (next_checkpoint_angle > 70 or next_checkpoint_angle < -70) \
     #    and thrust != "BOOST":
-        # Accelerate progressively
+    #    # Accelerate progressively
     #    thrust = round(thrust/2)
     
     print("Angle: " + str(next_checkpoint_angle) + ", Distance: " + str(next_checkpoint_dist), file=sys.stderr)
-    if next_checkpoint_angle > 30 or next_checkpoint_angle < -30:
-        #\ and next_checkpoint_dist < 4000:
-        thrust = 4
+    if next_checkpoint_angle > 25 or next_checkpoint_angle < -25 \
+        and next_checkpoint_dist < 5000:
+        thrust = 20
     
+    if abs(previous_checkpoint_angle) < abs(next_checkpoint_angle) \
+        and previous_checkpoint_dist > next_checkpoint_dist \
+        and thrust != "BOOST" \
+        and thrust >= 50:
+            print("TOTO ", file=sys.stderr)
+            thrust = max(thrust - 10, thrust/2, 0)
+       
+       
+    # For next round     
+    previous_checkpoint_angle = next_checkpoint_angle
     previous_checkpoint_dist = next_checkpoint_dist
     
     # TODO: probably need to be better each turn
@@ -80,7 +92,12 @@ while True:
     #    else:
     #        thrust = 100
     
-    print(str(next_checkpoint_x) + " " + str(next_checkpoint_y) + " " + str(thrust))
+    #  ACTUALLY THAT'S NOT THAT GOOD
+    if start:
+        print(str(next_checkpoint_x) + " " + str(next_checkpoint_y) + " " + str(1))
+        start = False
+    else:
+        print(str(next_checkpoint_x) + " " + str(next_checkpoint_y) + " " + str(thrust))
     
    #if start:
 #        print(str(opponent_x) + " " + str(opponent_y) + " BOOST")
